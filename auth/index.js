@@ -21,7 +21,7 @@ module.exports = (req, res) => {
         });
     }
     else {
-        res.send({alive: true})
+        res.send({ alive: true })
     }
 
 }
