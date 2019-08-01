@@ -17,3 +17,5 @@ storage/node_modules
 storage/.env_local
 storage/.env
 storage/now.json
+
+testing/

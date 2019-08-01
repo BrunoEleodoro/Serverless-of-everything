@@ -11,7 +11,8 @@ module.exports = (req, res) => {
             }
             res.json({
                 token: req.query.token,
-                valid: isValid
+                valid: isValid,
+                payload: payload
             });
         });
     } else if (req.query.type != undefined && req.query.type == "generate") {
