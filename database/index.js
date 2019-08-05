@@ -23,9 +23,9 @@ module.exports = (req, res) => {
                         status: 200,
                         response: await user.listAllUsers({})
                     })
-                } 
+                }
                 else if (req.body.route == "/user/updateUser") {
-                    if(await user.update(req.body.id, req.body.body)) {
+                    if (await user.update(req.body.id, req.body.body)) {
                         res.json({
                             status: 200,
                             response: req.body.body
@@ -52,23 +52,28 @@ async function basicMethods(req, res) {
     //authenticate method
     if (req.body != undefined && req.body.route != undefined && req.body.route == "/user/authenticate") {
         if (await user.authenticate(req.body.email, req.body.password)) {
-            success(res);
+            var token_body = await generateToken(req.body.email);
+            if(token_body == false) {
+                error_response(res);
+            } else {
+                res.json({
+                    token: token_body.token
+                })
+            }
         } else {
             failure(res);
         }
     } else if (req.body.route != undefined && req.body.route == "/user/signup") {
 
         if (await user.signup(req.body.body)) {
-            request("https://serverless-auth.brunoeleodoro.now.sh?type=generate&email=" + req.body.body.email, async function (error, response, body) {
-                if (error) {
-                    error_response(res);
-                } else {
-                    res.json({
-                        token: JSON.parse(body).token
-                    })
-                }
-            });
-
+            var token_body = await generateToken(req.body.body.email);
+            if(token_body == false) {
+                error_response(res);
+            } else {
+                res.json({
+                    token: token_body.token
+                })
+            }
         } else {
             failure(res);
         }
@@ -77,6 +82,18 @@ async function basicMethods(req, res) {
             alive: true
         })
     }
+}
+
+function generateToken(email) {
+    return new Promise(async function (resolve, reject) {
+        request("https://serverless-auth.brunoeleodoro.now.sh?type=generate&email=" + email, async function (error, response, body) {
+            if (error) {
+                reject(false);
+            } else {
+                resolve(JSON.parse(body))
+            }
+        });
+    })
 }
 
 function success(res) {
