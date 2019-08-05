@@ -18,4 +18,9 @@ storage/.env_local
 storage/.env
 storage/now.json
 
+mail/node_modules
+mail/.env_local
+mail/.env
+mail/now.json
+
 testing/
