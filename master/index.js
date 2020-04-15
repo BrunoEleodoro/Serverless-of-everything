@@ -3,6 +3,7 @@ var express = require('express');
 var app = express();
 var request = require('request')
 const multipart = require('connect-multiparty');
+const { check, validationResult } = require('express-validator')
 const multipartMiddleware = multipart();
 const utils = require('./utils');
 
@@ -13,13 +14,22 @@ var storage_url = "https://serverless-storage.brunoeleodoro.now.sh";
 
 var port = process.env.PORT || 3001;
 app.use(express.json());
+
 app.get('/', (req, res) => {
     res.json({
         alive: true
     })
 });
 
-app.post('/user/authenticate', (req, res) => {
+app.post('/user/authenticate', [
+    check('email').isEmail(),
+    check('password').isLength({ min: 3 })
+], (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
     request.post({
         headers: { 'content-type': 'application/json' },
         url: database_url,
@@ -37,7 +47,15 @@ app.post('/user/authenticate', (req, res) => {
     });
 });
 
-app.post("/user/signup", (req, res) => {
+app.post("/user/signup", [
+    check('email').isEmail(),
+    check('password').isLength({ min: 3 }),
+    check('username').isEmpty(),
+], (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
     request.post({
         headers: { 'content-type': 'application/json' },
         url: database_url,
@@ -73,7 +91,6 @@ app.post("/user/listAllUsers", (req, res) => {
     } else {
         utils.error_response(res)
     }
-
 });
 
 
